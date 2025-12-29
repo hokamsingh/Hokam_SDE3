@@ -11,5 +11,11 @@ services:
     volumes:
       - mongodb_data:/data/db
 
+  redis:
+    image: redis:7-alpine
+    container_name: conversation-redis
+    ports:
+      - "6379:6379"
+
 volumes:
   mongodb_data:
