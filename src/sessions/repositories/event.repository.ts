@@ -31,7 +31,20 @@ export class EventRepository {
             payload,
             timestamp,
         });
-        return event.save();
+
+        try {
+            return await event.save();
+        } catch (error) {
+            if (error.code === 11000) {
+                // Idempotency: return existing event on duplicate
+                const existing = await this.eventModel.findOne({ sessionId, eventId }).exec();
+                if (!existing) {
+                    throw error;
+                }
+                return existing;
+            }
+            throw error;
+        }
     }
 
     async findBySessionId(sessionId: string, limit: number = 50, offset: number = 0): Promise<PaginatedEvents> {
