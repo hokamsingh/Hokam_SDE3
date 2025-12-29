@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { SessionsModule } from './sessions/sessions.module';
 import { RedisModule } from './redis/redis.module';
@@ -17,6 +18,6 @@ import { envValidationSchema } from './config/env.validation';
     SessionsModule,
   ],
   controllers: [AppController],
-  providers: [],
+  providers: [AppService],
 })
 export class AppModule { }
