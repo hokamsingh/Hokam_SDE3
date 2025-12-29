@@ -4,6 +4,7 @@ import { ConversationSession, ConversationSessionSchema, ConversationEvent, Conv
 import { SessionRepository, EventRepository } from './repositories';
 
 import { SessionsService } from './sessions.service';
+import { SessionsController } from './sessions.controller';
 
 @Module({
     imports: [
@@ -12,6 +13,7 @@ import { SessionsService } from './sessions.service';
             { name: ConversationEvent.name, schema: ConversationEventSchema },
         ]),
     ],
+    controllers: [SessionsController],
     providers: [SessionRepository, EventRepository, SessionsService],
     exports: [SessionRepository, EventRepository, SessionsService],
 })
