@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { LoggerModule } from 'nestjs-pino';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { DatabaseModule } from './database/database.module';
+import { envValidationSchema } from './config/env.validation';
 import { SessionsModule } from './sessions/sessions.module';
 import { RedisModule } from './redis/redis.module';
-import { envValidationSchema } from './config/env.validation';
 
 @Module({
   imports: [
@@ -13,9 +14,28 @@ import { envValidationSchema } from './config/env.validation';
       isGlobal: true,
       validationSchema: envValidationSchema,
     }),
-    DatabaseModule,
-    RedisModule,
+    LoggerModule.forRoot({
+      pinoHttp: {
+        transport: process.env.NODE_ENV !== 'production' ? { target: 'pino-pretty' } : undefined,
+        autoLogging: true,
+        serializers: {
+          req: (req) => ({
+            id: req.id,
+            method: req.method,
+            url: req.url,
+          }),
+        },
+      },
+    }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGODB_URI'),
+      }),
+      inject: [ConfigService],
+    }),
     SessionsModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService],
