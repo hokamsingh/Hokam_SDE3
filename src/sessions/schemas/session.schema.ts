@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { SessionStatus } from '../../common/types';
+import { ISession, SessionStatus } from '../../common/types';
 
 @Schema({ timestamps: true })
-export class ConversationSession extends Document {
+export class ConversationSession extends Document implements ISession {
     @Prop({ required: true, unique: true })
     sessionId: string;
 

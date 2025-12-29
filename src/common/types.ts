@@ -10,3 +10,20 @@ export enum EventType {
     BOT_SPEECH = 'bot_speech',
     SYSTEM = 'system',
 }
+
+export interface ISession {
+    sessionId: string;
+    status: SessionStatus;
+    language: string;
+    startedAt: Date;
+    endedAt: Date | null;
+    metadata: Record<string, unknown>;
+}
+
+export interface IEvent {
+    eventId: string;
+    sessionId: string;
+    type: EventType;
+    payload: Record<string, unknown>;
+    timestamp: Date;
+}
