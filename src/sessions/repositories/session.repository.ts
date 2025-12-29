@@ -10,7 +10,7 @@ export class SessionRepository {
         private readonly sessionModel: Model<ConversationSession>,
     ) { }
 
-    async upsertSession(sessionId: string, language: string, metadata?: Record<string, any>): Promise<ConversationSession> {
+    async upsertSession(sessionId: string, language: string, metadata?: Record<string, unknown>): Promise<ConversationSession> {
         const session = await this.sessionModel.findOneAndUpdate(
             { sessionId },
             {
@@ -32,7 +32,7 @@ export class SessionRepository {
     }
 
     async updateStatus(sessionId: string, status: SessionStatus, endedAt?: Date): Promise<ConversationSession | null> {
-        const update: any = { status };
+        const update: Partial<ConversationSession> = { status };
         if (endedAt) {
             update.endedAt = endedAt;
         }

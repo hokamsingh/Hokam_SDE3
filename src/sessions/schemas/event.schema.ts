@@ -19,7 +19,7 @@ export class ConversationEvent extends Document {
     type: EventType;
 
     @Prop({ type: Object, required: true })
-    payload: Record<string, any>;
+    payload: Record<string, unknown>;
 
     @Prop({ required: true, index: true })
     timestamp: Date;

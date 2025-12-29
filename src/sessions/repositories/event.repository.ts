@@ -20,7 +20,7 @@ export class EventRepository {
         sessionId: string,
         eventId: string,
         type: EventType,
-        payload: Record<string, any>,
+        payload: Record<string, unknown>,
         timestamp: Date,
     ): Promise<ConversationEvent> {
         const event = new this.eventModel({

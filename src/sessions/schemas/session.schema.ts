@@ -26,7 +26,7 @@ export class ConversationSession extends Document {
     endedAt: Date;
 
     @Prop({ type: Object, default: {} })
-    metadata: Record<string, any>;
+    metadata: Record<string, unknown>;
 }
 
 export const ConversationSessionSchema = SchemaFactory.createForClass(ConversationSession);
