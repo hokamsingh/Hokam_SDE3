@@ -1,12 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-
-export enum SessionStatus {
-    INITIATED = 'initiated',
-    ACTIVE = 'active',
-    COMPLETED = 'completed',
-    FAILED = 'failed',
-}
+import { SessionStatus } from '../../common/types';
 
 @Schema({ timestamps: true })
 export class ConversationSession extends Document {

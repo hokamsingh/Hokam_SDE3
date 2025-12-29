@@ -1,11 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-
-export enum EventType {
-    USER_SPEECH = 'user_speech',
-    BOT_SPEECH = 'bot_speech',
-    SYSTEM = 'system',
-}
+import { EventType } from '../../common/types';
 
 @Schema({ timestamps: false })
 export class ConversationEvent extends Document {
