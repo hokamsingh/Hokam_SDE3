@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ConversationEvent } from '../schemas/event.schema';
+import { ConversationEvent } from '../schemas';
 import { EventType } from '@common/types';
 
 export interface PaginatedEvents {

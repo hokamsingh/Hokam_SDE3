@@ -1,9 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ConversationSession, ConversationSessionSchema } from './schemas/session.schema';
-import { ConversationEvent, ConversationEventSchema } from './schemas/event.schema';
-import { SessionRepository } from './repositories/session.repository';
-import { EventRepository } from './repositories/event.repository';
+import { ConversationSession, ConversationSessionSchema, ConversationEvent, ConversationEventSchema } from './schemas';
+import { SessionRepository, EventRepository } from './repositories';
 
 @Module({
     imports: [
