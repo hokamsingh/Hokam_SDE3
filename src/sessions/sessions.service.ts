@@ -33,18 +33,23 @@ export class SessionsService {
         );
     }
 
-    async getSession(sessionId: string) {
+    async getSession(sessionId: string, limit: number = 50, offset: number = 0) {
         const session = await this.sessionRepository.findBySessionId(sessionId);
         if (!session) {
             throw new NotFoundException(`Session ${sessionId} not found`);
         }
 
-        // TODO: Add pagination support for events
-        const events = await this.eventRepository.findBySessionId(sessionId);
+        const events = await this.eventRepository.findBySessionId(sessionId, limit, offset);
 
         return {
             ...session.toObject(),
             events: events.events,
+            pagination: {
+                total: events.total,
+                limit,
+                offset,
+                hasMore: events.hasMore,
+            },
         };
     }
 
