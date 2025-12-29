@@ -3,6 +3,7 @@ import { SessionRepository, EventRepository } from './repositories';
 import { CreateSessionDto, CreateEventDto } from './dto';
 import { SessionStatus, PaginatedResult } from '@common/types';
 import { PaginationDto } from '@common/dto/pagination.dto';
+import { ConversationSession, ConversationEvent } from './schemas';
 
 @Injectable()
 export class SessionsService {
@@ -11,7 +12,7 @@ export class SessionsService {
         private readonly eventRepository: EventRepository,
     ) { }
 
-    async createSession(createSessionDto: CreateSessionDto) {
+    async createSession(createSessionDto: CreateSessionDto): Promise<ConversationSession> {
         return this.sessionRepository.upsertSession(
             createSessionDto.sessionId,
             createSessionDto.language,
@@ -19,7 +20,7 @@ export class SessionsService {
         );
     }
 
-    async addEvent(sessionId: string, createEventDto: CreateEventDto) {
+    async addEvent(sessionId: string, createEventDto: CreateEventDto): Promise<ConversationEvent> {
         const session = await this.sessionRepository.findBySessionId(sessionId);
         if (!session) {
             throw new NotFoundException(`Session ${sessionId} not found`);
@@ -34,7 +35,7 @@ export class SessionsService {
         );
     }
 
-    async getSession(sessionId: string, paginationDto: PaginationDto = { limit: 50, offset: 0 }): Promise<Record<string, unknown> & { events: PaginatedResult<unknown>['items'], pagination: Omit<PaginatedResult<unknown>, 'items'> }> {
+    async getSession(sessionId: string, paginationDto: PaginationDto = { limit: 50, offset: 0 }): Promise<Record<string, unknown> & { events: ConversationEvent[]; pagination: Omit<PaginatedResult<ConversationEvent>, 'items'> }> {
         const { limit = 50, offset = 0 } = paginationDto;
         const session = await this.sessionRepository.findBySessionId(sessionId);
         if (!session) {
@@ -55,7 +56,7 @@ export class SessionsService {
         };
     }
 
-    async completeSession(sessionId: string) {
+    async completeSession(sessionId: string): Promise<ConversationSession> {
         const session = await this.sessionRepository.findBySessionId(sessionId);
         if (!session) {
             throw new NotFoundException(`Session ${sessionId} not found`);
@@ -65,10 +66,16 @@ export class SessionsService {
             return session;
         }
 
-        return this.sessionRepository.updateStatus(
+        const updatedSession = await this.sessionRepository.updateStatus(
             sessionId,
             SessionStatus.COMPLETED,
             new Date(),
         );
+
+        if (!updatedSession) {
+            throw new NotFoundException(`Session ${sessionId} not found`);
+        }
+
+        return updatedSession;
     }
 }
