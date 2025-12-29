@@ -15,8 +15,6 @@ async function bootstrap() {
     .setTitle('Conversation Service API')
     .setDescription('Voice AI platform conversation session management')
     .setVersion('1.0')
-    .addTag('sessions')
-    .addTag('health')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
