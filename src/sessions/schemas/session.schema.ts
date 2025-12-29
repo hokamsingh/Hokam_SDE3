@@ -10,7 +10,7 @@ export enum SessionStatus {
 
 @Schema({ timestamps: true })
 export class ConversationSession extends Document {
-    @Prop({ required: true, unique: true, index: true })
+    @Prop({ required: true, unique: true })
     sessionId: string;
 
     @Prop({ required: true, enum: SessionStatus, default: SessionStatus.INITIATED })
@@ -31,4 +31,4 @@ export class ConversationSession extends Document {
 
 export const ConversationSessionSchema = SchemaFactory.createForClass(ConversationSession);
 
-ConversationSessionSchema.index({ sessionId: 1 }, { unique: true });
+

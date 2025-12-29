@@ -12,7 +12,7 @@ export class ConversationEvent extends Document {
     @Prop({ required: true })
     eventId: string;
 
-    @Prop({ required: true, index: true })
+    @Prop({ required: true })
     sessionId: string;
 
     @Prop({ required: true, enum: EventType })
@@ -21,7 +21,7 @@ export class ConversationEvent extends Document {
     @Prop({ type: Object, required: true })
     payload: Record<string, unknown>;
 
-    @Prop({ required: true, index: true })
+    @Prop({ required: true })
     timestamp: Date;
 }
 
