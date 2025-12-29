@@ -1,15 +1,49 @@
 version: '3.8'
 
 services:
-  mongodb:
+  mongo1:
     image: mongo:7
-    container_name: conversation-mongodb
+    container_name: mongo1
+    command: [ "mongod", "--replSet", "rs0", "--bind_ip_all", "--port", "27017" ]
     ports:
       - "27017:27017"
-    environment:
-      MONGO_INITDB_DATABASE: conversation-service
-    volumes:
-      - mongodb_data:/data/db
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mongo2:
+    image: mongo:7
+    container_name: mongo2
+    command: [ "mongod", "--replSet", "rs0", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "27018:27017"
+
+  mongo3:
+    image: mongo:7
+    container_name: mongo3
+    command: [ "mongod", "--replSet", "rs0", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "27019:27017"
+
+  mongo-init:
+    image: mongo:7
+    container_name: mongo-init
+    depends_on:
+      mongo1:
+        condition: service_healthy
+    command: >
+      mongosh --host mongo1:27017 --eval '
+        rs.initiate({
+          _id: "rs0",
+          members: [
+            { _id: 0, host: "mongo1:27017", priority: 2 },
+            { _id: 1, host: "mongo2:27017", priority: 1 },
+            { _id: 2, host: "mongo3:27017", priority: 1 }
+          ]
+        })
+      '
 
   redis:
     image: redis:7-alpine
@@ -20,5 +54,4 @@ services:
       - redis_data:/data
 
 volumes:
-  mongodb_data:
   redis_data:

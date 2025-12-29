@@ -17,15 +17,14 @@ I chose indexes to balance query performance with data integrity:
 3.  **`sessionId` + `timestamp` on Events**: Optimized for the `GET /sessions/:id` endpoint. Since we return events sorted by time, this compound index allows MongoDB to fetch and sort the paginated results efficiently without an in-memory sort.
 
 ## 4. How would you scale this system for millions of sessions per day?
-I designed the system to be stateless and horizontally scalable, but for massive scale, I would evolve it into 4 stages:
-1.  **Event-Driven Ingestion**: Direct DB writes would become a bottleneck. I would eagerly accept events into a queue (Kafka/RabbitMQ) and use a pool of consumers to batch-write to MongoDB.
-2.  **Sharding Strategy**: I would shard the `events` collection by `sessionId` to ensure efficient reads/writes.
+I have implemented **Read/Write Splitting** via a 3-node MongoDB Replica Set. This ensures writes hit the Primary while reads are distributed across Secondaries. To scale further:
+1.  **Event-Driven Ingestion**: Direct DB writes would eventually bottleneck. I would use Kafka/RabbitMQ to buffer events and batch-write to MongoDB.
+2.  **Sharding Strategy**: I would shard the `events` collection by `sessionId` to distribute the write load across multiple shard clusters.
 3.  **Hybrid Caching Strategy**:
     *   **Session Metadata**: Highly stable. Cached in Redis (Read-Through).
-    *   **Events**: Highly volatile. **Fetched live from MongoDB**.
-    *   *Why?*: Caching the entire response via Interceptor causes UI lag on new speech packets. This approach balances load reduction with data freshness.
-4.  **Autoscaling (HPA + KEDA)**: I would use KEDA to scale consumer pods based on "Kafka Lag" (queue depth) ensuring the system reacts instantly to traffic bursts.
-5.  **Storage Tiers**: Completed sessions older than 30 days would be offloaded to S3 (Parquet format) to keep the "Hot" operational database small.
+    *   **Events**: Highly volatile. Fetched live from MongoDB secondaries.
+4.  **Autoscaling (HPA + KEDA)**: Scale consumer pods based on queue depth (Kafka Lag) to handle traffic bursts.
+5.  **Storage Tiers**: Move sessions older than 30 days to S3/Cold storage to keep the operational database size manageable.
 
 ## 5. What did you intentionally keep out of scope, and why?
 I focused strictly on the core functional requirements to deliver a high-quality, production-ready MVP.
