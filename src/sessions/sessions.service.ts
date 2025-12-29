@@ -5,25 +5,41 @@ import { SessionStatus, PaginatedResult } from '@common/types';
 import { PaginationDto } from '@common/dto/pagination.dto';
 import { ConversationSession, ConversationEvent } from './schemas';
 
+import { RedisService } from '../redis/redis.service';
+
 @Injectable()
 export class SessionsService {
     constructor(
         private readonly sessionRepository: SessionRepository,
         private readonly eventRepository: EventRepository,
+        private readonly redisService: RedisService,
     ) { }
 
+    private getCacheKey(sessionId: string): string {
+        return `session:${sessionId}`;
+    }
+
     async createSession(createSessionDto: CreateSessionDto): Promise<ConversationSession> {
-        return this.sessionRepository.upsertSession(
+        const session = await this.sessionRepository.upsertSession(
             createSessionDto.sessionId,
             createSessionDto.language,
             createSessionDto.metadata || {},
         );
+        // Cache the new/updated session
+        await this.redisService.set(this.getCacheKey(session.sessionId), JSON.stringify(session), 600);
+        return session;
     }
 
     async addEvent(sessionId: string, createEventDto: CreateEventDto): Promise<ConversationEvent> {
-        const session = await this.sessionRepository.findBySessionId(sessionId);
-        if (!session) {
-            throw new NotFoundException(`Session ${sessionId} not found`);
+        // Minimal check: Redis first, then Mongo
+        let sessionData = await this.redisService.get(this.getCacheKey(sessionId));
+        if (!sessionData) {
+            const session = await this.sessionRepository.findBySessionId(sessionId);
+            if (!session) {
+                throw new NotFoundException(`Session ${sessionId} not found`);
+            }
+            // Populate cache on miss
+            await this.redisService.set(this.getCacheKey(sessionId), JSON.stringify(session), 600);
         }
 
         return this.eventRepository.createEvent(
@@ -37,15 +53,28 @@ export class SessionsService {
 
     async getSession(sessionId: string, paginationDto: PaginationDto = { limit: 50, offset: 0 }): Promise<Record<string, unknown> & { events: ConversationEvent[]; pagination: Omit<PaginatedResult<ConversationEvent>, 'items'> }> {
         const { limit = 50, offset = 0 } = paginationDto;
-        const session = await this.sessionRepository.findBySessionId(sessionId);
-        if (!session) {
-            throw new NotFoundException(`Session ${sessionId} not found`);
+
+        // 1. Try Cache for Session Metadata
+        let session: any;
+        const cachedSession = await this.redisService.get(this.getCacheKey(sessionId));
+
+        if (cachedSession) {
+            session = JSON.parse(cachedSession);
+        } else {
+            const dbSession = await this.sessionRepository.findBySessionId(sessionId);
+            if (!dbSession) {
+                throw new NotFoundException(`Session ${sessionId} not found`);
+            }
+            session = dbSession.toObject ? dbSession.toObject() : dbSession;
+            // Cache for 10 minutes
+            await this.redisService.set(this.getCacheKey(sessionId), JSON.stringify(session), 600);
         }
 
+        // 2. Events are not cached here (too dynamic/large), fetched from DB
         const events = await this.eventRepository.findBySessionId(sessionId, limit, offset);
 
         return {
-            ...session.toObject(),
+            ...session,
             events: events.events,
             pagination: {
                 total: events.total,
@@ -75,6 +104,9 @@ export class SessionsService {
         if (!updatedSession) {
             throw new NotFoundException(`Session ${sessionId} not found`);
         }
+
+        // Update Cache with new status
+        await this.redisService.set(this.getCacheKey(sessionId), JSON.stringify(updatedSession), 600);
 
         return updatedSession;
     }
