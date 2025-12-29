@@ -6,12 +6,15 @@ import { SessionRepository, EventRepository } from './repositories';
 import { SessionsService } from './sessions.service';
 import { SessionsController } from './sessions.controller';
 
+import { RedisModule } from '../redis/redis.module';
+
 @Module({
     imports: [
         MongooseModule.forFeature([
             { name: ConversationSession.name, schema: ConversationSessionSchema },
             { name: ConversationEvent.name, schema: ConversationEventSchema },
         ]),
+        RedisModule,
     ],
     controllers: [SessionsController],
     providers: [SessionRepository, EventRepository, SessionsService],
