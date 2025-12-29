@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { ISession, SessionStatus } from '../../common/types';
+import { ISession, SessionStatus } from '@common/types';
 
 @Schema({ timestamps: true })
 export class ConversationSession extends Document implements ISession {

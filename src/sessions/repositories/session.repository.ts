@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ConversationSession } from '../schemas/session.schema';
-import { SessionStatus } from '../../common/types';
+import { SessionStatus } from '@common/types';
 
 @Injectable()
 export class SessionRepository {

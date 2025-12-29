@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { EventType, IEvent } from '../../common/types';
+import { EventType, IEvent } from '@common/types';
 
 @Schema({ timestamps: false })
 export class ConversationEvent extends Document implements IEvent {
