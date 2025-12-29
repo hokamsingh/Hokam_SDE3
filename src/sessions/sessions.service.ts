@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SessionRepository, EventRepository } from './repositories';
 import { CreateSessionDto, CreateEventDto } from './dto';
-import { SessionStatus, PaginatedResult } from '@common/types';
+import { SessionStatus, PaginatedResult, ErrorCode } from '@common/types';
 import { PaginationDto } from '@common/dto/pagination.dto';
 import { ConversationSession, ConversationEvent } from './schemas';
 
@@ -36,7 +36,10 @@ export class SessionsService {
         if (!sessionData) {
             const session = await this.sessionRepository.findBySessionId(sessionId);
             if (!session) {
-                throw new NotFoundException(`Session ${sessionId} not found`);
+                throw new NotFoundException({
+                    message: `Session ${sessionId} not found`,
+                    errorCode: ErrorCode.SESSION_NOT_FOUND,
+                });
             }
             // Populate cache on miss
             await this.redisService.set(this.getCacheKey(sessionId), JSON.stringify(session), 600);
@@ -63,7 +66,10 @@ export class SessionsService {
         } else {
             const dbSession = await this.sessionRepository.findBySessionId(sessionId);
             if (!dbSession) {
-                throw new NotFoundException(`Session ${sessionId} not found`);
+                throw new NotFoundException({
+                    message: `Session ${sessionId} not found`,
+                    errorCode: ErrorCode.SESSION_NOT_FOUND,
+                });
             }
             session = dbSession.toObject ? dbSession.toObject() : dbSession;
             // Cache for 10 minutes
@@ -88,7 +94,10 @@ export class SessionsService {
     async completeSession(sessionId: string): Promise<ConversationSession> {
         const session = await this.sessionRepository.findBySessionId(sessionId);
         if (!session) {
-            throw new NotFoundException(`Session ${sessionId} not found`);
+            throw new NotFoundException({
+                message: `Session ${sessionId} not found`,
+                errorCode: ErrorCode.SESSION_NOT_FOUND,
+            });
         }
 
         if (session.status === SessionStatus.COMPLETED) {
@@ -102,7 +111,10 @@ export class SessionsService {
         );
 
         if (!updatedSession) {
-            throw new NotFoundException(`Session ${sessionId} not found`);
+            throw new NotFoundException({
+                message: `Session ${sessionId} not found`,
+                errorCode: ErrorCode.SESSION_NOT_FOUND,
+            });
         }
 
         // Update Cache with new status

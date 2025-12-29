@@ -28,6 +28,14 @@ export interface IEvent {
     timestamp: Date;
 }
 
+export enum ErrorCode {
+    SESSION_NOT_FOUND = 'SESSION_NOT_FOUND',
+    DUPLICATE_EVENT = 'DUPLICATE_EVENT',
+    INVALID_INPUT = 'INVALID_INPUT',
+    INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
+    RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
+}
+
 export interface PaginatedResult<T> {
     items: T[];
     total: number;
