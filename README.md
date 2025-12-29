@@ -64,6 +64,11 @@ The server will start on `http://localhost:3000`.
 
 ## API Documentation
 
+The API comes with a built-in Swagger UI for interactive exploration and testing.
+
+-   **Swagger UI**: [http://localhost:3000/api](http://localhost:3000/api)
+-   **OpenAPI Spec**: [http://localhost:3000/api-json](http://localhost:3000/api-json)
+
 ### Sessions
 
 -   **Create Session**: `POST /sessions`
