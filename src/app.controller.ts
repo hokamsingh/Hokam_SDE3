@@ -1,18 +1,37 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { InjectConnection } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
+import { RedisService } from './redis/redis.service';
 
-@ApiTags('health')
 @Controller()
 export class AppController {
+  constructor(
+    @InjectConnection() private readonly mongoConnection: Connection,
+    private readonly redisService: RedisService,
+  ) { }
 
   @Get('health')
-  @ApiOperation({ summary: 'Health check endpoint' })
-  @ApiResponse({ status: 200, description: 'Service is healthy' })
-  getHealth() {
+  async getHealth() {
+    const mongoStatus = this.mongoConnection.readyState === 1 ? 'up' : 'down';
+    let redisStatus = 'down';
+
+    try {
+      const pong = await this.redisService.ping();
+      if (pong === 'PONG') {
+        redisStatus = 'up';
+      }
+    } catch (e) {
+      redisStatus = 'down';
+    }
+
     return {
-      status: 'ok',
+      status: mongoStatus === 'up' && redisStatus === 'up' ? 'ok' : 'degraded',
       timestamp: new Date().toISOString(),
       service: 'conversation-service',
+      dependencies: {
+        mongodb: mongoStatus,
+        redis: redisStatus,
+      },
     };
   }
 }
