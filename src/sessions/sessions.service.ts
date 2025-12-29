@@ -54,7 +54,7 @@ export class SessionsService {
     async getSession(sessionId: string, paginationDto: PaginationDto = { limit: 50, offset: 0 }): Promise<Record<string, unknown> & { events: ConversationEvent[]; pagination: Omit<PaginatedResult<ConversationEvent>, 'items'> }> {
         const { limit = 50, offset = 0 } = paginationDto;
 
-        // 1. Try Cache for Session Metadata
+        // 1. Try Cache for Session Metadata (Stable)
         let session: any;
         const cachedSession = await this.redisService.get(this.getCacheKey(sessionId));
 
@@ -70,7 +70,7 @@ export class SessionsService {
             await this.redisService.set(this.getCacheKey(sessionId), JSON.stringify(session), 600);
         }
 
-        // 2. Events are not cached here (too dynamic/large), fetched from DB
+        // 2. Events are fetched LIVE from DB (Volatile)
         const events = await this.eventRepository.findBySessionId(sessionId, limit, offset);
 
         return {
