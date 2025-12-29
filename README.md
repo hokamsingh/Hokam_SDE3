@@ -1,37 +1,47 @@
 # Conversation Service
 
-A robust, scalable NestJS backend for managing voice AI conversation sessions and events.
+A robust, enterprise-grade NestJS backend for managing voice AI conversation sessions and events. Designed for high availability, observability, and scalability.
 
-## Features
+## 🚀 Features
 
--   **Session Management**: Create and track conversation lifecycles.
--   **Event Tracking**: Log proprietary events with payloads (User Speech, Bot Speech, System).
--   **Idempotency**: Robust handling of duplicate sessions and events.
--   **Pagination**: Efficient retrieval of session history.
--   **Health Monitoring**: Real-time checks for MongoDB and Redis dependencies.
--   **Security**: Helmet, CORS, and Input Validation enabled.
+### Core Logic
+-   **Session Lifecycle**: Comprehensive management of initiated, active, and completed sessions.
+-   **Event Tracking**: Optimized logging of voice events (User Speech, Bot Speech, System) with metadata support.
+-   **Idempotency**: Application and database-level handling to prevent duplicate session or event entries.
+-   **Standardized API**: Consistent response envelopes and machine-readable error codes.
 
-## Tech Stack
+### Infrastructure & Scaling
+-   **3-Node MongoDB Replica Set**: Full cluster setup in Docker for high availability.
+-   **Read/Write Splitting**: Database traffic routing (Reads to secondaries, Writes to primary) for maximum throughput.
+-   **Hybrid Caching Strategy**: Redis read-through caching for stable metadata to reduce DB load.
+
+### Resilience & Security
+-   **Circuit Breaker (Opossum)**: Protects the system from cascading failures during Redis outages.
+-   **Distributed Rate Limiting**: Global API protection using Redis-backed throttler.
+-   **Production Security**: Integrated Helmet, CORS, and Payload compression.
+
+### Observability & Tracing
+-   **Correlation IDs**: End-to-end request tracing via `X-Request-Id` headers and JSON logs.
+-   **Structured Logging**: Production-ready logging using `nestjs-pino`.
+-   **Advanced Health Monitoring**: Detailed endpoint checking for Mongo, Redis, and memory usage.
+
+## 🛠 Tech Stack
 
 -   **Framework**: [NestJS](https://nestjs.com/)
--   **Database**: MongoDB (via Mongoose)
--   **Caching**: Redis
--   **Validation**: Joi & class-validator
--   **Language**: TypeScript
+-   **Database**: MongoDB (v7 Replica Set)
+-   **Caching**: Redis (v7 Alpine)
+-   **Observability**: Pino & Terminus
+-   **Testing**: Jest & Supertest
 
-## Assumptions
+## 📈 Future Goals
 
-1.  **Trust Boundary**: The API is internal-facing or behind an API Gateway/WAF. Rate limiting and auth are handled at that layer.
-2.  **Session Uniqueness**: `sessionId` is globally unique and provided by the client (or an upstream service).
-3.  **Event Order**: While we track timestamps, precise ordering of concurrent events sent via partial speech packets is best-effort unless sequenced by the client.
-4.  **Data Retention**: Voice event data is high-volume; we assume an archival strategy (offloading to S3) is acceptable for long-term retention.
+1.  **Event-Driven Processing**: Move from direct database writes to a message-bus architecture (Kafka/RabbitMQ) for ingestion.
+2.  **Database Sharding**: Implement shard keys based on `sessionId` to support TB-scale event data.
+3.  **Real-Time Monitoring**: Integration with Prometheus and Grafana for latency and throughput dashboards.
+4.  **Advanced Auth**: Full OIDC integration for fine-grained multi-tenant access control.
+5.  **Analytics Service**: Separate read-model for aggregate conversation insights (CQRS).
 
-## Prerequisites
-
--   Node.js (v18+)
--   Docker & Docker Compose
-
-## Setup & Running
+## ⚙️ Setup & Running
 
 1.  **Clone the repository**
     ```bash
@@ -39,7 +49,7 @@ A robust, scalable NestJS backend for managing voice AI conversation sessions an
     cd conversation-service
     ```
 
-2.  **Start Infrastructure (MongoDB & Redis)**
+2.  **Start Infrastructure (Replica Set MongoDB & Redis)**
     ```bash
     docker-compose up -d
     ```
@@ -50,7 +60,6 @@ A robust, scalable NestJS backend for managing voice AI conversation sessions an
     ```
 
 4.  **Configure Environment**
-    Copy the example env file:
     ```bash
     cp .env.example .env
     ```
@@ -60,33 +69,18 @@ A robust, scalable NestJS backend for managing voice AI conversation sessions an
     npm run start:dev
     ```
 
-The server will start on `http://localhost:3000`.
+## 🧪 Testing
 
-## API Documentation
+The project maintains a high-quality gate with automated hooks:
 
-The API comes with a built-in Swagger UI for interactive exploration and testing.
+-   **Unit Tests**: `npm run test`
+-   **E2E Smoke Tests**: `npm run test:e2e`
+-   **Linting**: `npm run lint`
 
--   **Swagger UI**: [http://localhost:3000/api](http://localhost:3000/api)
--   **OpenAPI Spec**: [http://localhost:3000/api-json](http://localhost:3000/api-json)
+*Note: Husky pre-commit hooks ensure all tests and linting pass before any commit.*
 
-### Sessions
+## 📖 API Documentation
 
--   **Create Session**: `POST /sessions`
--   **Get Session**: `GET /sessions/:sessionId?limit=50&offset=0`
--   **Complete Session**: `POST /sessions/:sessionId/complete`
-
-### Events
-
--   **Add Event**: `POST /sessions/:sessionId/events`
-
-### Monitoring
-
--   **Health Check**: `GET /health`
-
-## Testing
-
-To run the test suite (once implemented):
-
-```bash
-npm run test
-```
+Interactive documentation is available at:
+-   **Swagger UI**: `http://localhost:3000/api`
+-   **OpenAPI Spec**: `http://localhost:3000/api-json`
