@@ -19,20 +19,23 @@ import { RedisModule } from './redis/redis.module';
     }),
     LoggerModule.forRoot({
       pinoHttp: {
-        transport: process.env.NODE_ENV !== 'production' ? { target: 'pino-pretty' } : undefined,
+        transport:
+          process.env.NODE_ENV !== 'production'
+            ? { target: 'pino-pretty' }
+            : undefined,
         autoLogging: true,
         serializers: {
-          req: (req) => ({
-            id: req.id,
-            method: req.method,
-            url: req.url,
+          req: (req: any) => ({
+            id: req.id as string,
+            method: req.method as string,
+            url: req.url as string,
           }),
         },
       },
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         uri: configService.get<string>('MONGODB_URI'),
       }),
       inject: [ConfigService],
@@ -40,7 +43,7 @@ import { RedisModule } from './redis/redis.module';
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config) => ({
+      useFactory: (config: ConfigService) => ({
         throttlers: [
           {
             ttl: 60000,
@@ -48,8 +51,8 @@ import { RedisModule } from './redis/redis.module';
           },
         ],
         storage: new ThrottlerStorageRedisService({
-          host: config.get('REDIS_HOST'),
-          port: config.get('REDIS_PORT'),
+          host: config.get<string>('REDIS_HOST') || 'localhost',
+          port: config.get<number>('REDIS_PORT') || 6379,
         }),
       }),
     }),
@@ -65,4 +68,4 @@ import { RedisModule } from './redis/redis.module';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

@@ -8,7 +8,7 @@ export class AppService {
   constructor(
     @InjectConnection() private readonly mongoConnection: Connection,
     private readonly redisService: RedisService,
-  ) { }
+  ) {}
 
   async getHealth() {
     const mongoStatus = this.mongoConnection.readyState === 1 ? 'up' : 'down';

@@ -1,0 +1,16 @@
+node_modules
+dist
+npm-debug.log
+Dockerfile
+.dockerignore
+.git
+.gitignore
+README.md
+DESIGN.md
+OPTIMIZATIONS.md
+verification.log
+startup.log
+local_start*.log
+app_debug.log
+.agent
+.gemini
