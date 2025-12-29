@@ -4,10 +4,14 @@ import { AppController } from './app.controller';
 import { DatabaseModule } from './database/database.module';
 import { SessionsModule } from './sessions/sessions.module';
 import { RedisModule } from './redis/redis.module';
+import { envValidationSchema } from './config/env.validation';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validationSchema: envValidationSchema,
+    }),
     DatabaseModule,
     RedisModule,
     SessionsModule,
