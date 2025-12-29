@@ -7,7 +7,7 @@ export class ConversationSession extends Document implements ISession {
     @Prop({ required: true, unique: true })
     sessionId: string;
 
-    @Prop({ required: true, enum: SessionStatus, default: SessionStatus.INITIATED })
+    @Prop({ required: true, type: String, enum: SessionStatus, default: SessionStatus.INITIATED })
     status: SessionStatus;
 
     @Prop({ required: true })

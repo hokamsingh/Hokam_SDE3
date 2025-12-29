@@ -10,7 +10,7 @@ export class ConversationEvent extends Document implements IEvent {
     @Prop({ required: true })
     sessionId: string;
 
-    @Prop({ required: true, enum: EventType })
+    @Prop({ required: true, type: String, enum: EventType })
     type: EventType;
 
     @Prop({ type: Object, required: true })
