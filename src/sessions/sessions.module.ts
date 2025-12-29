@@ -3,6 +3,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConversationSession, ConversationSessionSchema, ConversationEvent, ConversationEventSchema } from './schemas';
 import { SessionRepository, EventRepository } from './repositories';
 
+import { SessionsService } from './sessions.service';
+
 @Module({
     imports: [
         MongooseModule.forFeature([
@@ -10,7 +12,7 @@ import { SessionRepository, EventRepository } from './repositories';
             { name: ConversationEvent.name, schema: ConversationEventSchema },
         ]),
     ],
-    providers: [SessionRepository, EventRepository],
-    exports: [SessionRepository, EventRepository],
+    providers: [SessionRepository, EventRepository, SessionsService],
+    exports: [SessionRepository, EventRepository, SessionsService],
 })
 export class SessionsModule { }
