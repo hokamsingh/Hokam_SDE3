@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SessionRepository, EventRepository } from './repositories';
 import { CreateSessionDto, CreateEventDto } from './dto';
-import { SessionStatus } from '@common/types';
+import { SessionStatus, PaginatedResult } from '@common/types';
+import { PaginationDto } from '@common/dto/pagination.dto';
 
 @Injectable()
 export class SessionsService {
@@ -33,7 +34,8 @@ export class SessionsService {
         );
     }
 
-    async getSession(sessionId: string, limit: number = 50, offset: number = 0) {
+    async getSession(sessionId: string, paginationDto: PaginationDto = { limit: 50, offset: 0 }): Promise<Record<string, unknown> & { events: PaginatedResult<unknown>['items'], pagination: Omit<PaginatedResult<unknown>, 'items'> }> {
+        const { limit = 50, offset = 0 } = paginationDto;
         const session = await this.sessionRepository.findBySessionId(sessionId);
         if (!session) {
             throw new NotFoundException(`Session ${sessionId} not found`);
