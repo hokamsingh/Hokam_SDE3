@@ -16,6 +16,9 @@ services:
     container_name: conversation-redis
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
 
 volumes:
   mongodb_data:
+  redis_data:
